@@ -28,7 +28,7 @@ messages when FontForge can't save a file for us.
 
 #include "pdf2htmlEX-config.h"
 #include "util/ffw.h"
-#include <cairo/cairo.h>
+#include <cairo.h>
 #include <poppler/poppler-config.h>
 
 const char* oopsMessage  =

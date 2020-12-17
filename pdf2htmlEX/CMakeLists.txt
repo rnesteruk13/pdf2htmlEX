@@ -4,7 +4,7 @@ set(CMAKE_BUILD_TYPE Release CACHE STRING "Build configuration (Debug, Release, 
 
 project(pdf2htmlEX)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-cmake_minimum_required(VERSION 2.6.0 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.0.0 FATAL_ERROR)
 
 option(ENABLE_SVG "Enable SVG support, for generating SVG background images and converting Type 3 fonts" ON)
 
@@ -23,6 +23,10 @@ add_custom_target(dist
 
 find_package(PkgConfig)
 
+IF(APPLE)
+    # Fix linking on 10.14+. See https://stackoverflow.com/questions/54068035
+    LINK_DIRECTORIES(/usr/local/lib)
+ENDIF()
 
 # SINCE we have a very intimate relationship with a particular version of 
 # poppler... we explicitly describe the poppler include and library 
@@ -42,7 +46,6 @@ set(POPPLER_LIBRARIES ${POPPLER_LIBRARIES}
   ${CMAKE_SOURCE_DIR}/../poppler/build/glib/libpoppler-glib.a
   ${CMAKE_SOURCE_DIR}/../poppler/build/libpoppler.a
 )
-
 
 if(ENABLE_SVG)
     pkg_check_modules(CAIRO REQUIRED cairo>=1.10.0)
@@ -80,7 +83,7 @@ include_directories(
 include_directories(${FONTFORGE_INCLUDE_DIRS})
 link_directories(${FONTFORGE_LIBRARY_DIRS})
 set(FONTFORGE_LIBRARIES ${FONTFORGE_LIBRARIES}
-  ${CMAKE_SOURCE_DIR}/../fontforge/build/lib/libfontforge.a
+  ${CMAKE_SOURCE_DIR}/../fontforge/build/lib/libfontforge.dylib
 )
 
 # If we are using Alpine Linux then we need to add -lintl
@@ -109,9 +112,8 @@ set(PDF2HTMLEX_LIBS ${PDF2HTMLEX_LIBS}
 )
 
 # debug build flags (overwrite default cmake debug flags)
-set(CMAKE_C_FLAGS_DEBUG "-ggdb -pg")
-set(CMAKE_CXX_FLAGS_DEBUG "-ggdb -pg")
-set(CMAKE_EXE_LINKER_FLAGS_DEBUG "-pg")
+set(CMAKE_C_FLAGS_DEBUG "-ggdb")
+set(CMAKE_CXX_FLAGS_DEBUG "-ggdb")
 
 # release build flags (overwrite default cmake release flags)
 set(CMAKE_C_FLAGS_RELEASE "-O2 -DNDEBUG")
